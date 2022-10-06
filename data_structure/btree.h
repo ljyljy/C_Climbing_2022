@@ -2,16 +2,19 @@
 #define DEGREE		3
 typedef int KEY_VALUE;
 
+// B树：自上而下的实现，无需旋转，故无需parent（但B+树需要）
 typedef struct _btree_node {
-    KEY_VALUE* keys;
-    struct _btree_node** childrens;
-    int num;
-    int leaf;
+    KEY_VALUE* keys; // 关键字值，个数∈[0, DEGREE-1]
+    // b-树：M叉搜索树，M建议为偶数，便于分裂
+    struct _btree_node** childrens; // 最多M叉 = DEGREE = 2*t
+    // struct _btree_node* childrens[DEGREE]; // 或定义为指针数组
+    int num; // key的个数，∈[0, DEGREE-1] = [0, 2*t-1]
+    int leaf; // 是否是叶子
 } btree_node;
 
 typedef struct _btree {
     btree_node* root;
-    int t;
+    int t; // 分叉相关，M叉 = DEGREE = 2*t，便于分裂&合并
 } btree;
 
 btree_node* btree_create_node(int t, int leaf);

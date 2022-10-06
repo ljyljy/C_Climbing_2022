@@ -5,21 +5,8 @@
 #include <string.h>
 
 #include <assert.h>
+#include "btree.h"
 
-#define DEGREE		3
-typedef int KEY_VALUE;
-
-typedef struct _btree_node {
-    KEY_VALUE* keys;
-    struct _btree_node** childrens;
-    int num;
-    int leaf;
-} btree_node;
-
-typedef struct _btree {
-    btree_node* root;
-    int t;
-} btree;
 
 btree_node* btree_create_node(int t, int leaf) {
 
@@ -46,58 +33,58 @@ void btree_destroy_node(btree_node* node) {
 
 
 void btree_create(btree* T, int t) {
-    T->t = t;
+    T->t = t;  // t：分叉相关，M叉 = DEGREE = 2*t，便于分裂&合并
 
     btree_node* x = btree_create_node(t, 1);
     T->root = x;
 
 }
 
-
+// x: 待分裂的结点，i：结点x的第i棵子树
 void btree_split_child(btree* T, btree_node* x, int i) {
     int t = T->t;
 
-    btree_node* y = x->childrens[i];
-    btree_node* z = btree_create_node(t, y->leaf);
+    btree_node* y = x->childrens[i]; // 待分裂结点x 的第i棵子树y
+    btree_node* z = btree_create_node(t, y->leaf); // 创建一个新节点z，将y的后半段（第[t, 2t-1)个关键词）都拷贝过来
 
     z->num = t - 1;
-
     int j = 0;
-    for (j = 0;j < t - 1;j++) {
+    for (j = 0; j < t - 1; j++) { // 注意关键词个数∈[0, 2t-1), 需要j < t-1
         z->keys[j] = y->keys[j + t];
     }
-    if (y->leaf == 0) {
-        for (j = 0;j < t;j++) {
+
+    if (y->leaf == 0) { // y非叶子，则将y的后半段子树（第[t, 2t)棵子树）都拷贝为z的孩子
+        for (j = 0; j < t; j++) {
             z->childrens[j] = y->childrens[j + t];
         }
     }
+    y->num = t - 1; // y原有2t-1棵子树，分裂后，只保留前半段([0, t-1])
 
-    y->num = t - 1;
-    for (j = x->num;j >= i + 1;j--) {
+    for (j = x->num; j >= i + 1; j--) { // 将x的后半段子树：[i+1, num=2t-1]，后移1位（空出中间的第i+1位，待插入新的z结点.子树）
         x->childrens[j + 1] = x->childrens[j];
     }
+    x->childrens[i + 1] = z; // 新节点z，设为x的第i+1棵子树
 
-    x->childrens[i + 1] = z;
-
-    for (j = x->num - 1;j >= i;j--) {
+    for (j = x->num - 1; j >= i; j--) {// 将x的后半段关键词：[i,num=2t-2]，后移1位（空出中间的第i位，待插入新的z结点.keys）
         x->keys[j + 1] = x->keys[j];
     }
-    x->keys[i] = y->keys[t - 1];
+    x->keys[i] = y->keys[t - 1]; // 子树y，升级为父亲x
     x->num += 1;
 
 }
 
+// 插入一个非满的结点x，则直接插入，无需分裂
 void btree_insert_nonfull(btree* T, btree_node* x, KEY_VALUE k) {
 
-    int i = x->num - 1;
+    int i = x->num - 1; // 从后往前看
 
     if (x->leaf == 1) {
 
-        while (i >= 0 && x->keys[i] > k) {
+        while (i >= 0 && x->keys[i] > k) { // 将关键词>k的（∈[i,2t-1)）后移，空出第i位，插入新结点key==k
             x->keys[i + 1] = x->keys[i];
-            i--;
+            i--; // i前移
         }
-        x->keys[i + 1] = k;
+        x->keys[i + 1] = k; // 空出第i位(old)，while退出前自减，因此还需+1
         x->num += 1;
 
     }
@@ -117,12 +104,12 @@ void btree_insert(btree* T, KEY_VALUE key) {
     //int t = T->t;
 
     btree_node* r = T->root;
-    if (r->num == 2 * T->t - 1) {
+    if (r->num == 2 * T->t - 1) { // r满了，则插入新的根节点
 
-        btree_node* node = btree_create_node(T->t, 0);
+        btree_node* node = btree_create_node(T->t, 0); // 分裂新node为根
         T->root = node;
 
-        node->childrens[0] = r;
+        node->childrens[0] = r; // r降级为新node的孩子
 
         btree_split_child(T, node, 0);
 
