@@ -5,6 +5,7 @@
 #define THREAD_COUNT 20
 #define THREAD_LOOP 100000000
 
+// case: 数据竞争
 long counter = 0; // 全局变量，用来记录线程的累加值；
 int run(void* data) {
     for (int i = 0; i < THREAD_LOOP; i++)
