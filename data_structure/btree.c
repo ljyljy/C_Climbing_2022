@@ -88,15 +88,16 @@ void btree_insert_nonfull(btree* T, btree_node* x, KEY_VALUE k) {
         x->num += 1;
 
     }
-    else {
+    else { // x非叶子，则找合适的子树
         while (i >= 0 && x->keys[i] > k) i--;
-
+        // 退出while：x->keys[i] <= k, 由于i自减，因此下面需要+1
+        // x的第[i+1]子树满了，先分裂
         if (x->childrens[i + 1]->num == (2 * (T->t)) - 1) {
             btree_split_child(T, x, i + 1);
-            if (k > x->keys[i + 1]) i++;
+            if (k > x->keys[i + 1]) i++; // 此时，key==k的新结点需要插入在[i+1](old)之后，执行i++后，空出了第[i+1]（new）位置
         }
 
-        btree_insert_nonfull(T, x->childrens[i + 1], k);
+        btree_insert_nonfull(T, x->childrens[i + 1], k); // 向B树(T)中的x的第[i+1]子树，插入key==k的结点
     }
 }
 
