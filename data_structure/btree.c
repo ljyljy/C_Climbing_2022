@@ -7,7 +7,10 @@
 #include <assert.h>
 #include "btree.h"
 
-
+/**
+ * 扩展：B数的线程安全？
+ * - 锁子树
+ */
 btree_node* btree_create_node(int t, int leaf) {
 
     btree_node* node = (btree_node*)calloc(1, sizeof(btree_node));
