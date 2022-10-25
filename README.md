@@ -3,6 +3,15 @@
 ## Data Structure
 
 - Red Black Tree
-- B+ Tree (todo)
+- B+ Tree 
+
+## Concurrent
+
+- volatile, mutex, atomic, condition, thread local
+- memory order
+
+## Design Pattern
+
+- todo
 
 ## Other (todo)
