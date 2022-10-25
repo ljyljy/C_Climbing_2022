@@ -1,25 +1,25 @@
 #include <vector>
 
-//
-class IDisplay {
+
+class IDisplay { // 类似Java.接口
 public:
     virtual void Show(float temperature) = 0;
     virtual ~IDisplay() {}
 };
 
-class DisplayA : public IDisplay {
+class DisplayA: public IDisplay {
 public:
     virtual void Show(float temperature);
 private:
     void jianyi();
 };
 
-class DisplayB : public IDisplay{
+class DisplayB: public IDisplay {
 public:
     virtual void Show(float temperature);
 };
 
-class DisplayC : public IDisplay{
+class DisplayC: public IDisplay {
 public:
     virtual void Show(float temperature);
 };
@@ -29,8 +29,8 @@ class WeatherData {
 
 class DataCenter {
 public:
-    void Attach(IDisplay * ob);
-    void Detach(IDisplay * ob);
+    void Attach(IDisplay* ob);
+    void Detach(IDisplay* ob);
     void Notify() {
         float temper = CalcTemperature();
         for (auto iter = obs.begin(); iter != obs.end(); iter++) {
@@ -38,12 +38,12 @@ public:
         }
     }
 
-// 接口隔离
+    // 接口隔离
 private:
-    virtual WeatherData * GetWeatherData();
+    virtual WeatherData* GetWeatherData();
 
     virtual float CalcTemperature() {
-        WeatherData * data = GetWeatherData();
+        WeatherData* data = GetWeatherData();
         // ...
         float temper/* = */;
         return temper;
@@ -52,18 +52,18 @@ private:
 };
 
 int main() {
-    DataCenter *center = new DataCenter;
-    IDisplay *da = new DisplayA();
-    IDisplay *db = new DisplayB();
-    IDisplay *dc = new DisplayC();
+    DataCenter* center = new DataCenter;
+    IDisplay* da = new DisplayA(); // 多态，父类引用=子类对象
+    IDisplay* db = new DisplayB();
+    IDisplay* dc = new DisplayC();
     center->Attach(da);
     center->Attach(db);
     center->Attach(dc);
 
 
-    
+
     center->Notify();
-    
+
     //-----
     center->Detach(db);
     center->Notify();
